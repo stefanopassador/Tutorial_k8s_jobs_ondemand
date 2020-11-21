@@ -1,5 +1,5 @@
 import yaml
-
+import time
 from kubernetes import client, config, watch
 
 JOB_NAME = "simple-job"
@@ -16,7 +16,7 @@ def create_job_object():
         spec=client.V1PodSpec(restart_policy="OnFailure", containers=[container]))
     # Create the specification of deployment
     spec = client.V1JobSpec(
-        parallelism=1,
+        parallelism=4,
         template=template,
         backoff_limit=4)
     # Instantiate the job object
@@ -35,23 +35,13 @@ def create_job(api_instance, job):
         namespace="default")
     print("Job created. status='%s'" % str(api_response.status))
 
-
-def update_job(api_instance, job):
-    # Update container image
-    api_response = api_instance.patch_namespaced_job(
-        name=JOB_NAME,
-        namespace="default",
-        body=job)
-    print("Job updated. status='%s'" % str(api_response.status))
-
-
 def delete_job(api_instance):
     api_response = api_instance.delete_namespaced_job(
         name=JOB_NAME,
         namespace="default",
         body=client.V1DeleteOptions(
             propagation_policy='Foreground',
-            grace_period_seconds=5))
+            grace_period_seconds=0))
     print("Job deleted. status='%s'" % str(api_response.status))
 
 
@@ -59,7 +49,8 @@ def main():
     # Configs can be set in Configuration class directly or using helper
     # utility. If no argument provided, the config will be loaded from
     # default location.
-    config.load_kube_config('C:\\Users\spassador\.kube\config')
+    #config.load_kube_config('C:\Users\spassador\.kube\config')
+    config.load_incluster_config()
     batch_v1 = client.BatchV1Api()
     core_v1 = client.CoreV1Api()
 
@@ -68,23 +59,11 @@ def main():
     job = create_job_object()
 
     create_job(batch_v1, job)
-
-    count = 100
-    w = watch.Watch()
-    for event in w.stream(core_v1.list_pod_for_all_namespaces, timeout_seconds=20):
-        print("Event: %s %s %s %s" % (
-            event['type'],
-            event['object'].kind,
-            event['object'].metadata.name,
-            event['object'].status.phase)
-        )
-        count -= 1
-        if not count:
-            w.stop()
-    print("Finished pod stream.")
-
+    time.sleep(30)
     delete_job(batch_v1)
 
 
 if __name__ == '__main__':
-    main()
+    for i in range(1, 3):
+        main()
+        time.sleep(5)
