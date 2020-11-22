@@ -3,17 +3,12 @@ kind: Job
 metadata:
   name: simple-job
 spec:
-  parallelism: 1
   template:
-    metadata:
-      name: simple-job
-      labels:
-        app: simple-app
     spec:
       containers:
       - name: busybox
         image: busybox
         args:
         - sleep
-        - "60"
+        - "6"
       restartPolicy: OnFailure
