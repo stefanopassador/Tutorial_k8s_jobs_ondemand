@@ -44,10 +44,9 @@ def delete_job(api_instance):
 
 
 def main():
-    config.load_incluster_config()
-    
+    config.load_kube_config(kubernetes_config_file_path)
     batch_v1 = client.BatchV1Api()
-    
+
     job = create_job_object()
 
     create_job(batch_v1, job)
@@ -56,7 +55,4 @@ def main():
 
 
 if __name__ == '__main__':
-    while True:
-        main()
-        time.sleep(5)
-    
+    main()

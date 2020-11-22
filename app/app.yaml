@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: test
+  name: tutorialk8sjob
 spec:
   containers:
     - name: tutorialk8sjob
